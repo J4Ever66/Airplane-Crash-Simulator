@@ -1,10 +1,17 @@
 package f16cs350.project.loader.terrain;
 
+import f16cs350.atc.datatype.Altitude_ATC;
 import f16cs350.atc.datatype.CoordinatesWorld3D_ATC;
 import f16cs350.atc.datatype.Latitude_ATC;
+import f16cs350.atc.datatype.Longitude_ATC;
 
 import java.io.File;
 import java.util.*;
+
+/**
+ *  CSCD:350 -- PROJECT Pt. 1A -- TEAM 5
+ *
+ **/
 
 public class TerrainLoader{
 	private File definition;    //  constructor initiate parse? Most likely not.
@@ -13,16 +20,14 @@ public class TerrainLoader{
 		this.definition = in;
 	}
 
-	public List<List<f16cs350.atc.datatype.CoordinatesWorld3D_ATC>> parse() throws Exception {
-		int rlats = 0, rlons = 0, ralts = 0, nodes = 0, surfaces = 0;
+	public List<List<f16cs350.atc.datatype.CoordinatesWorld3D_ATC>> parse(){ //  THROW EXCEPTION??
+		int rlats = 1, rlons = 1, ralts = 1, nodes = 1, surfaces = 1;   // start at 1 so index matches
 		String rep = "";
 		Scanner scan = null;
+        List<List<f16cs350.atc.datatype.CoordinatesWorld3D_ATC>> terrain = null;
 
-		try {	// extend try catch to whole function?
+        try {
 			scan = new Scanner(definition);
-		}catch(Exception e){
-			throw new RuntimeException("File import failed.");
-		}
 
 		while(scan.hasNextLine()){	// SCAN TO FIND ELEMENTS WHILE SAVING REPRESENTATION.
 			String temp = scan.nextLine();
@@ -41,71 +46,92 @@ public class TerrainLoader{
 				case "SURFACE":	surfaces++;
 				break;
 				case "TERRAIN":	break;
-				default: throw new RuntimeException("Invalid file input.");
+				default:
 			}
 		}
 
 		int[][] RLAT = new int[rlats][2], RLON = new int[rlons][2], NODES = new int[nodes][3];
 		double[] RLAT_sec = new double[rlats], RLON_sec = new double[rlons];
 		int[] RALT = new int[ralts];
-
-
-		Object[] SURFACES = new Object[surfaces];
-
+		ArrayList<Integer>[] SURFACES = (ArrayList<Integer>[]) new ArrayList[surfaces];
+        ArrayList<Integer> terrainPH = new ArrayList<>();
 		scan = new Scanner(rep);
 
 		while(scan.hasNextLine()){	// 0RLAT 1# 2#:3#:4# -- 0RALT 1# 2#  -- TYPE INDEX VAL:VAL:VAL
 			String temp = scan.nextLine();
-			String[] tkn = temp.split(":| "); // delimit [SPACE] && :
+			String[] tkn = temp.split(":| "); // delimit [SPACE] || :
 
-			int tkn1 = Integer.parseInt(tkn[1]),
-					tkn2 = Integer.parseInt(tkn[2]);
-
-
-			switch(tkn[0]){
+			switch(tkn[0]){ // prevent duplicates?
 				case "RLAT":
-                    int tkn3 = Integer.parseInt(tkn[3]);
-                    double tkn4 = Double.parseDouble(tkn[4]);
-
-					RLAT[tkn1][0] = tkn2;	//DEG
-					RLAT[tkn1][1] = tkn3;	//MIN
-					RLAT_sec[tkn1] = tkn4;//SEC
+					RLAT[Integer.parseInt(tkn[1])][0] = Integer.parseInt(tkn[2]);	//DEG
+					RLAT[Integer.parseInt(tkn[1])][1] = Integer.parseInt(tkn[3]);	//MIN
+					RLAT_sec[Integer.parseInt(tkn[1])] = Double.parseDouble(tkn[4]); //SEC
 				break;
 				case "RLON":
-					RLON[tkn1][0] = tkn2;
-					RLON[tkn1][1] = Integer.parseInt(tkn[3]);
-					RLON_sec[tkn1] = Double.parseDouble(tkn[4]);
+					RLON[Integer.parseInt(tkn[1])][0] = Integer.parseInt(tkn[2]);
+					RLON[Integer.parseInt(tkn[1])][1] = Integer.parseInt(tkn[3]);
+					RLON_sec[Integer.parseInt(tkn[1])] = Double.parseDouble(tkn[4]);
 				break;
-				case "RALT":	
-					RALT[tkn1] = tkn2;	// FEET
+				case "RALT":
+				    //if(true){ //RALT[Integer.parseInt(tkn[1])]) { -- how to check if the index is already there?
+                        RALT[Integer.parseInt(tkn[1])] = Integer.parseInt(tkn[2]);    // FEET
+                    //}else{
+                    //    throw new RuntimeException("Duplicate RALT index, failed to parse file.");
+                    //}
 				break;
 				case "NODE":
-					NODES[tkn1][0] = tkn2;
-                    NODES[tkn1][1] = Integer.parseInt(tkn[3]);
-                    NODES[tkn1][2] = Integer.parseInt(tkn[4]);
+					//if(NODES[Integer.parseInt(tkn[1])] == null) {	// PREVENT DUPLICATE ENTRY
+						NODES[Integer.parseInt(tkn[1])][0] = Integer.parseInt(tkn[2]);
+						NODES[Integer.parseInt(tkn[1])][1] = Integer.parseInt(tkn[3]);
+						NODES[Integer.parseInt(tkn[1])][2] = Integer.parseInt(tkn[4]);
+					//}else{
+					//	throw new RuntimeException("Duplicate NODE index, failed to parse file.");
+					//}
 				break;
-				case "SURFACE":	
+				case "SURFACE":	//3+
 					ArrayList<Integer> surfaceNodes = new ArrayList<>();
-					for(int x = 2; x < tkn.length; x++){ // length / size?
+					for(int x = 2; x < tkn.length; x++){
 						surfaceNodes.add(Integer.parseInt(tkn[x])); // each node index
 					}
-					SURFACES[tkn1] = nodes;
+					SURFACES[Integer.parseInt(tkn[1])] = surfaceNodes;
 				break;
-				case "TERRAIN":	break;
-				default: throw new RuntimeException("Invalid file input.");
+				case "TERRAIN":
+                    for(int x = 1; x < tkn.length; x++){
+                        terrainPH.add(Integer.parseInt(tkn[x])); // each node index
+                    }
+				    break;
+				default:
 			}
 		}
+        CoordinatesWorld3D_ATC[] COORDINATES = new CoordinatesWorld3D_ATC[nodes];
 
-		// at this point we should have every value for every index that we need to construct.
+        for(int z = 1; z < nodes; z++){ // create node 1 to N
+            COORDINATES[z] = new CoordinatesWorld3D_ATC(new Latitude_ATC( RLAT[z][0], RLAT[z][1], RLAT_sec[z]),
+                    new Longitude_ATC(RLON[z][0], RLON[z][1], RLON_sec[z]), new Altitude_ATC(RALT[z]));
+        }
 
-        //CoordinatesWorld3D_ATC[] NODES = new CoordinatesWorld3D_ATC[nodes];
-        //NODES[tkn1] = new CoordinatesWorld3D_ATC(new Latitude_ATC(tkn2, tkn3, tkn4), );
+        ArrayList<CoordinatesWorld3D_ATC>[] SURFACE_LISTS = (ArrayList<CoordinatesWorld3D_ATC>[]) new ArrayList[surfaces];
 
-		// construct NODES ( 3DCOORDINATES ) .. create List of surfaces.
-		// create the terrain list, add surfaces and return.
-        return null;
+        for(int x = 1; x < SURFACES.length; x++){ // start 1
+            ArrayList<CoordinatesWorld3D_ATC> surfaceCoordinates = new ArrayList<CoordinatesWorld3D_ATC>();
+            for(int y = 0; y < SURFACES[x].size(); y++){    // INDIVIDUAL NODE PLACEHOLDER FOR SURFACE CONSTRUCTION
+                surfaceCoordinates.add(COORDINATES[SURFACES[x].get(y)]); // add corresponding node according to placeholder
+            }
+            SURFACE_LISTS[x] = surfaceCoordinates; // add list to SURFACE OBJECT placeholder
+        }
+
+        terrain = new ArrayList<>();
+
+        for(int w = 0; w < SURFACE_LISTS.length - 1; w++){
+            terrain.add(SURFACE_LISTS[terrainPH.get(w)]);   // get place holder for surface, grab surface and add to list
+        }
+
+		}catch(Exception e){
+			throw new RuntimeException(e.getMessage()); // correct thing to do? should method throw?
+		}
+		System.out.println("TERRAIN SIZE" + terrain.size());
+
+        return terrain;
 	}
-
-
 
 }
