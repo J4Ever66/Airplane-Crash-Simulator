@@ -52,6 +52,14 @@ public class CommunicationLoader {
     }
 
     public String decodeLog(String log){
+        //split by new line
+        //first line is checksum
+        //compare checksum to actual checksum
+        //each line after is statement
+        //split time and statement
+        //decodeTime();
+        //decodeStatement();
+        //rebuild decoded log and return
         return null;
     }
 
