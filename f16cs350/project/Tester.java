@@ -1,31 +1,42 @@
-//BETTER VERSION. Works with base 2 and base 36. 
-//Doesn't work with larger time values, yet. The parseInt function breaks there
-
-public class Tester
+public class Tester//Works for all bases
 {
-   private static int base = 36;
+   private static int base = 2;
    public static void main(String[] args)
    {
       double time = 1.1;
       System.out.println(encodeTime(time));
-      /*time = 71.111;
+      
+       time = 2.1;
+      System.out.println(encodeTime(time));
+      
+       time = 4.1;
+      System.out.println(encodeTime(time));
+      
+       time = 5.1;
+      System.out.println(encodeTime(time));
+      
+       time = 7.1;
+      System.out.println(encodeTime(time));
+      time = 71.111;
       System.out.println(encodeTime(time));
       time = 7.111;
       System.out.println(encodeTime(time));
       time = 0.011;
-      System.out.println(encodeTime(time));*/
+      System.out.println(encodeTime(time));
    }
    
    public static String encodeTime(double time)//base 10
    {
       long len = Math.round(Math.ceil(Math.log(9999999) / Math.log(base)));
    
-      long rounded = Math.round(time*10000);
+      int rounded = Integer.parseInt((""+Math.round(time*10000)),10);
+      
+      System.out.println("::"+rounded+"::");
    
-      int newNum = Integer.parseInt((""+rounded),base);
-     
       String zeros=""
-      ,ret = ""+newNum;
+      ,ret = Integer.toString(rounded,base);
+     
+      
       
       int i;
       long g=(len-ret.length());
@@ -36,3 +47,4 @@ public class Tester
       return zeros + ret;
    }//return at target base
 }
+
