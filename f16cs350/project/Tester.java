@@ -1,50 +1,52 @@
-public class Tester//Works for all bases
+public class Tester
 {
-   private static int base = 2;
+   private static int base;
    public static void main(String[] args)
    {
-      double time = 1.1;
-      System.out.println(encodeTime(time));
+      double time = 999.4321;
+      System.out.println("time = "+time);
       
-       time = 2.1;
-      System.out.println(encodeTime(time));
+      base = 10;
+      System.out.println("base 10:\t"+encodeTime(time));
       
-       time = 4.1;
-      System.out.println(encodeTime(time));
+      base = 2;
+      System.out.println("base 2:  \t"+encodeTime(time));
       
-       time = 5.1;
-      System.out.println(encodeTime(time));
+      base = 36;
+      System.out.println("base 36:\t"+encodeTime(time));
       
-       time = 7.1;
-      System.out.println(encodeTime(time));
-      time = 71.111;
-      System.out.println(encodeTime(time));
-      time = 7.111;
-      System.out.println(encodeTime(time));
-      time = 0.011;
-      System.out.println(encodeTime(time));
+      
+      time = 0.001;
+      System.out.println("time = "+time);
+      
+      base = 10;
+      System.out.println("base 10:\t"+encodeTime(time));
+      
+      base = 2;
+      System.out.println("base 2:  \t"+encodeTime(time));
+      
+      base = 36;
+      System.out.println("base 36:\t"+encodeTime(time));
    }
    
    public static String encodeTime(double time)//base 10
    {
       long len = Math.round(Math.ceil(Math.log(9999999) / Math.log(base)));
+      
+      int newNum = Integer.parseInt(( "" + Math.round( time * 10000 )) , 10);
+      //           ^convert long to int    ^convert double to long
    
-      int rounded = Integer.parseInt((""+Math.round(time*10000)),10);
-      
-      System.out.println("::"+rounded+"::");
+      String ret = Integer.toString(newNum,base).toUpperCase();
+      //           ^convert to target base  
    
-      String zeros=""
-      ,ret = Integer.toString(rounded,base);
-     
-      
-      
       int i;
       long g=(len-ret.length());
-      
-      for(i=0;i<g;i++)
-         zeros += "0";
+      String zeros="";
+      for(i=0;i<g;i++){
+         zeros += "0";}
          
       return zeros + ret;
    }//return at target base
 }
+
 
