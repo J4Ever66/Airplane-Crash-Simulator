@@ -6,7 +6,7 @@ import java.util.Map;
 
 /**
  *  CSCD:350 -- PROJECT Pt. 1B -- TEAM 5
- *
+ *	Aaron Griffis - Grant Edwards - Jordan Everard
  **/
 public class CommunicationLoader {
     private int base, encodeSize, checksum, wordCount;
@@ -24,8 +24,8 @@ public class CommunicationLoader {
 
     private HashMap<String, String> dictionary;
     private HashSet<String> customWords;
-    private String[] key = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e",
-    "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
+    private String[] key = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E",
+    "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
 
     public CommunicationLoader(int base, int encodingSize){
         this.wordCount = 0;
@@ -68,22 +68,19 @@ public class CommunicationLoader {
     }
 
     public String registerCustomWord(String index, String word){
-        this.dictionary.put(index, word);
-        this.checksum = dictionary.hashCode();
+        if(!dictionary.containsKey(index)) {
+            this.dictionary.put(index, word);
+            this.checksum = dictionary.hashCode();
+            wordCount++;
+        }else{
+            throw new RuntimeException("Index already used.");
+        }
         return index;
     }
 
     public boolean isValidCustomIndex(String index){
         int indexVal = getIndex(index);
-        if(indexVal > wordCount && indexVal <= calculateMaxValue(base, encodeSize)){
-            return true;
-        }
-        return false;
-    }
-
-    public boolean isValidIndex(String index){ // getMaxValue
-        int indexVal = getIndex(index);
-        if(indexVal >= 0 && indexVal <= calculateMaxValue(base, encodeSize)){
+        if(indexVal > dictionaryString.length && indexVal <= calculateMaxValue(base, encodeSize)){
             return true;
         }
         return false;
@@ -95,7 +92,15 @@ public class CommunicationLoader {
             int intVal = getIntegerValue(index.charAt(index.length() - (x + 1)));
             sum += intVal * Math.pow(base, x);
         }
-       return sum;
+        return sum;
+    }
+
+    public boolean isValidIndex(String index){ // getMaxValue
+        int indexVal = getIndex(index);
+        if(indexVal >= 0 && indexVal <= calculateMaxValue(base, encodeSize)){
+            return true;
+        }
+        return false;
     }
 
     private int getIntegerValue(char c){ // get the integer index value for a given encode char key
