@@ -61,7 +61,6 @@ public class TerrainLoader{
 				rep += "\n";
 			}
 		}
-		System.out.println("rlats " + rlats + "   rlons " + rlons + "    ralts" + ralts + "   nodes " + nodes + " surfaces" + surfaces);
 
 		int[][] RLAT = new int[rlats][2], RLON = new int[rlons][2], NODES = new int[nodes][3];
 		double[] RLAT_sec = new double[rlats], RLON_sec = new double[rlons];
