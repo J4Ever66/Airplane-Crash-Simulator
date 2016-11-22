@@ -32,7 +32,7 @@ public class TerrainLoader{
 				while (temp != null && temp.length() > 1 && temp.charAt(0) == ' ') {
 					temp = temp.substring(1);
 				}
-				String[] tokens = temp.split(": | :|[ ]+|:");
+				String[] tokens = temp.split("[ :]+");
 				boolean valid = true;
 
 				switch (tokens[0]) {
@@ -68,7 +68,6 @@ public class TerrainLoader{
 					rep += "\n";
 				}
 			}
-			System.out.println("rlats " + rlats + "   rlons " + rlons + "    ralts" + ralts + "   nodes " + nodes + " surfaces" + surfaces);
 
 			int[][] RLAT = new int[rlats][2], RLON = new int[rlons][2], NODES = new int[nodes][3];
 			double[] RLAT_sec = new double[rlats], RLON_sec = new double[rlons];
