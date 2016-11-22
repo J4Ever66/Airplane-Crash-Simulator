@@ -6,7 +6,7 @@ import java.util.Map;
 
 /**
  *  CSCD:350 -- PROJECT Pt. 1B -- TEAM 5
- *	Aaron Griffis - Grant Edwards - Jordan Everard
+ *  Aaron Griffis - Grant Edwards - Jordan Everard
  **/
 public class CommunicationLoader {
     private int base, encodeSize, checksum, wordCount;
@@ -111,9 +111,9 @@ public class CommunicationLoader {
         return false;
     }
 
-    private int getIntegerValue(char c){ // get the integer index value for a given encode char key
+    private int getIntegerValue(char c){
         for(int x = 0; x < key.length; x++){
-            if(key[x].equals(c)){
+            if(key[x].equals("" + c)){
                 return x;
             }
         }
