@@ -76,12 +76,10 @@ public class TerrainLoader{
 			ArrayList<Integer> terrainPH = new ArrayList<>();
 			HashSet<Integer> nodeIndices = new HashSet<>();
 			scan = new Scanner(rep);
-
-			System.out.println("REP:" + rep);
-
+			
 			while (scan.hasNextLine()) {
 				String temp = scan.nextLine();
-				String[] tkn = temp.split("[ ]+| ");
+				String[] tkn = temp.split("[ ]+");
 
 				switch (tkn[0]) {
 					case "RLAT":
