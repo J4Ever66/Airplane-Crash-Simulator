@@ -8,7 +8,7 @@ import f16cs350.atc.world.navigation.A_ComponentNavaid;
 import java.io.InputStream;
 import java.util.*;
 
-/**     ###     WorldLoader Draft 2    ###
+/**     ###     WorldLoader Draft 3    ###
  *      Aaron Griffis - Grant Edwards - Jordan Everard
  **/
 public class WorldLoaderParser {
@@ -33,7 +33,6 @@ public class WorldLoaderParser {
 
         try {
             String data = streamToString();
-            _stream.close(); // CLOSE STREAM?
             Scanner scan = new Scanner(data);
             while(scan.hasNextLine()){
                 String lines = scan.nextLine();
@@ -110,11 +109,13 @@ public class WorldLoaderParser {
         int index = count;
         do{
             for(int x = 0; x < delimiters.length; x++) {
-                delim = lines[index].compareToIgnoreCase(delimiters[x]) == 0;
+                if(!(lines[index].compareToIgnoreCase(delimiters[x]) == 0)){
+                    delim = true;
+                }
             }
             if(!delim){
                 airport.addComponent(_airportComponents.get(lines[index + 1])); // fix so adds all of same type..
-                index ++;
+                index += 2;
             }
         }while(!delim);
         return index;
