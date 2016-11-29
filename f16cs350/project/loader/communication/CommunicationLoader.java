@@ -3,14 +3,15 @@ package f16cs350.project.loader.communication;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.ArrayList;
 
 /**
  *  CSCD:350 -- PROJECT Pt. 1B -- TEAM 5
  *  Aaron Griffis - Grant Edwards - Jordan Everard
  **/
 public class CommunicationLoader {
-    private int base, encodeSize, checksum, wordCount;
-    private String[] dictionaryString = { "a", "above", "across", "affirmative", "after", "again", "ah", "airport", "alpha", "altitude", "american", "an", "and", "approach",
+   private int base, encodeSize, checksum, wordCount;
+   private String[] dictionaryString = { "a", "above", "across", "affirmative", "after", "again", "ah", "airport", "alpha", "altitude", "american", "an", "and", "approach",
             "approved", "are", "as", "at", "atis", "before", "begin", "behind", "below", "bravo", "center", "cessna", "charlie", "clearance", "cleared", "climb", "contact", "correct",
             "course", "cross", "declare", "decrease", "degrees", "delay", "delivery", "delta", "departure", "descend", "direct", "discretion", "dme", "do", "east", "echo", "eight", "emergency",
             "enable", "engine", "established", "execute", "executing", "expect", "failure", "feet", "filed", "fire", "five", "flight", "for", "four", "foxtrot", "frequency", "front", "fuel", "gate",
@@ -22,36 +23,36 @@ public class CommunicationLoader {
             "tower", "traffic", "turn", "two", "um", "unable", "uniform", "united", "until", "vector", "vfr", "via", "victor", "vor", "west", "what", "when", "where", "whether", "whiskey", "who", "why",
             "wilco", "will", "with", "x-ray", "yankee", "you", "zero", "zulu"};
 
-    private HashMap<String, String> dictionary;
-    private HashSet<String> customWords;
-    private String[] key = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E",
+   private HashMap<String, String> dictionary;
+   private HashSet<String> customWords;
+   private String[] key = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E",
     "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
 
-    public CommunicationLoader(int base, int encodingSize){
-        this.wordCount = 0;
-        this.base = base;
-        this.encodeSize = encodingSize;
-        this.customWords = new HashSet<>();
-        this.dictionary = new HashMap<>();
-        fillDictionary();
+   public CommunicationLoader(int base, int encodingSize){
+      this.wordCount = 0;
+      this.base = base;
+      this.encodeSize = encodingSize;
+      this.customWords = new HashSet<>();
+      this.dictionary = new HashMap<>();
+      fillDictionary();
+   
+      this.checksum = dictionary.hashCode();
+   }
 
-        this.checksum = dictionary.hashCode();
-    }
 
+   public int calculateMaxValue(int base, int size){
+      double sum = 0;
+      for(int x = 0; x < size; x++){
+         sum += (base - 1) * Math.pow(base,  x);
+      }
+      return (int)sum;
+   }
 
-    public int calculateMaxValue(int base, int size){
-        double sum = 0;
-        for(int x = 0; x < size; x++){
-            sum += (base - 1) * Math.pow(base,  x);
-        }
-        return (int)sum;
-    }
+   public String decodeStatement(String s){
+      return null;
+   }
 
-    public String decodeStatement(String s){
-        return null;
-    }
-
-    public String decodeLog(String log){
+   public String decodeLog(String log){
         //split by new line
         //first line is checksum
         //compare checksum to actual checksum
@@ -60,98 +61,144 @@ public class CommunicationLoader {
         //decodeTime();
         //decodeStatement();
         //rebuild decoded log and return
-        return null;
-    }
+      return null;
+   }
 
-    public double decodeTime(String time){
-        return 0.0;
-    }
+   public double decodeTime(String time){
+      return ((double)Integer.parseInt(time,getBase()))/10000;
+   }   
 
-    public String encodeStatement(double time, String words){
-        return null;
-    }
+   public String encodeStatement(double time, String words)
+   {   
+      int newNum,i=0,len = getEncodingSize(),base = getBase();
+      String temp,phraseString = "",timeString = encodeTime(time);
+   
+      ArrayList<String> wordList = new ArrayList<String>();
+      
+      for (String retval: words.split(" ")) 
+         wordList.add(retval.toUpperCase());
+   
+      while(!wordList.isEmpty())
+      {
+         temp = Integer.toString(turnIntoNumber(wordList.remove(0)),base).toUpperCase();
+         int g=(len-temp.length());
+         String zeros="";
+         for(i=0;i<g;i++){
+            zeros += "0";}
+         phraseString += (zeros+temp);
+      }
+      
+      return timeString + phraseString;
+   }
 
-    public String encodeTime(double time){
-        return null;
-    }
+   public String encodeTime(double time)//base 10
+   {
+      long len = Math.round(Math.ceil(Math.log(9999999) / Math.log(getBase())));
+      
+      int newNum = Integer.parseInt(( "" + Math.round( time * 10000 )) , 10);
+      //           ^convert long to int    ^convert double to long
+   
+      String ret = Integer.toString(newNum,getBase()).toUpperCase();
+      //           ^convert to target base  
+   
+      int i;
+      long g=(len-ret.length());
+      String zeros="";
+      for(i=0;i<g;i++){
+         zeros += "0";}
+         
+      return zeros + ret;
+   }//return at target base
+    
+   private  int turnIntoNumber(String search)
+   {  
+      
+      int i;
+      for(i=0;i<dictionaryString.length;i++)
+         if((dictionaryString[i].toUpperCase()).compareTo(search) == 0)
+            return i;
+   
+      throw new RuntimeException("Word not found");
+   }
 
-    public String registerCustomWord(String index, String word){
-        if(!dictionary.containsKey(index)) {
-            this.dictionary.put(index, word);
-            this.checksum = dictionary.hashCode();
-            wordCount++;
-        }else{
-            throw new RuntimeException("Index already used.");
-        }
-        return index;
-    }
+   public String registerCustomWord(String index, String word){
+      if(!dictionary.containsKey(index)) {
+         this.dictionary.put(index, word);
+         this.checksum = dictionary.hashCode();
+         wordCount++;
+      }
+      else{
+         throw new RuntimeException("Index already used.");
+      }
+      return index;
+   }
 
-    public boolean isValidCustomIndex(String index){
-        int indexVal = getIndex(index);
-        if(indexVal > dictionaryString.length && indexVal <= calculateMaxValue(base, encodeSize)){
-            return true;
-        }
-        return false;
-    }
+   public boolean isValidCustomIndex(String index){
+      int indexVal = getIndex(index);
+      if(indexVal > dictionaryString.length && indexVal <= calculateMaxValue(base, encodeSize)){
+         return true;
+      }
+      return false;
+   }
 
-    private int getIndex(String index){ // convert any given key back to integer base 10 value
-        int sum = 0;
-        for(int x = 0; x < index.length(); x++){
-            int intVal = getIntegerValue(index.charAt(index.length() - (x + 1)));
-            sum += intVal * Math.pow(base, x);
-        }
-        return sum;
-    }
+   private int getIndex(String index){ // convert any given key back to integer base 10 value
+      int sum = 0;
+      for(int x = 0; x < index.length(); x++){
+         int intVal = getIntegerValue(index.charAt(index.length() - (x + 1)));
+         sum += intVal * Math.pow(base, x);
+      }
+      return sum;
+   }
 
-    public boolean isValidIndex(String index){ // getMaxValue
-        int indexVal = getIndex(index);
-        if(indexVal >= 0 && indexVal <= calculateMaxValue(base, encodeSize)){
-            return true;
-        }
-        return false;
-    }
+   public boolean isValidIndex(String index){ // getMaxValue
+      int indexVal = getIndex(index);
+      if(indexVal >= 0 && indexVal <= calculateMaxValue(base, encodeSize)){
+         return true;
+      }
+      return false;
+   }
 
-    private int getIntegerValue(char c){
-        for(int x = 0; x < key.length; x++){
-            if(key[x].equals("" + c)){
-                return x;
-            }
-        }
-        return -1; // throw runtime?
-    }
+   private int getIntegerValue(char c){
+      for(int x = 0; x < key.length; x++){
+         if(key[x].equals("" + c)){
+            return x;
+         }
+      }
+      return -1; // throw runtime?
+   }
 
-    public String getNextFreeIndex(){
-        int curIndex = (wordCount + 1);
-        String res = "";
-        while(curIndex > 0){
-            res = key[ curIndex % base  ] + res;
-            curIndex /= base;
-        }
-        return res;
-    }
+   public String getNextFreeIndex(){
+      int curIndex = (wordCount + 1);
+      String res = "";
+      while(curIndex > 0){
+         res = key[ curIndex % base  ] + res;
+         curIndex /= base;
+      }
+      return res;
+   }
 
 
-    private void fillDictionary(){  // populate the dictionary at startup with hard coded words ( does not save custom words )
-        for(int x = 0; x < dictionaryString.length; x++){
-            dictionary.put(getNextFreeIndex(), dictionaryString[x]);
-            wordCount++;
-        }
-    }
+   private void fillDictionary(){  // populate the dictionary at startup with hard coded words ( does not save custom words )
+      for(int x = 0; x < dictionaryString.length; x++){
+         dictionary.put(getNextFreeIndex(), dictionaryString[x]);
+         wordCount++;
+      }
+   }
 
-    public Map<String, String> getDictionary(){
-        return (Map<String, String>)this.dictionary.clone();
-    }
+   public Map<String, String> getDictionary(){
+      return (Map<String, String>)this.dictionary.clone();
+   }
 
-    public int getDictionaryChecksum(){
-        return checksum;
-    }
+   public int getDictionaryChecksum(){
+      return checksum;
+   }
 
-    public int getBase(){
-        return this.base;
-    }
+   public int getBase(){
+      return this.base;
+   }
 
-    public int getEncodingSize(){
-        return this.encodeSize;
-    }
+   public int getEncodingSize(){
+      return this.encodeSize;
+   }
 
 }
