@@ -48,8 +48,24 @@ public class CommunicationLoader {
       return (int)sum;
    }
 
-   public String decodeStatement(String s){
-      return null;
+   public String decodeStatement(String statement)
+   {
+      int timeLength = (int)Math.round(Math.ceil(Math.log(9999999) / Math.log(getBase())));
+      
+      int inc = getEncodingSize();
+
+      String time = "" + decodeTime(statement.substring(0,(timeLength)));
+
+      String temp,retWords = "";
+      int tempIndex;
+      
+      statement = statement.substring(timeLength);
+      
+      int l,r;
+      for(l=0,r=inc;r<statement.length()+1;l += inc, r += inc)
+         retWords += " " + dictionaryString[Integer.parseInt(statement.substring(l,r),getBase())];
+      
+      return time + retWords;
    }
 
    public String decodeLog(String log){
