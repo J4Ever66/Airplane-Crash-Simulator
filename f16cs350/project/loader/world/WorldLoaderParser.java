@@ -8,13 +8,13 @@ import f16cs350.atc.world.navigation.A_ComponentNavaid;
 import java.io.InputStream;
 import java.util.*;
 
-/**     ###     WorldLoader Draft 3    ###
+/**     ###     WorldLoader     ###
  *      Aaron Griffis - Grant Edwards - Jordan Everard
  **/
 public class WorldLoaderParser {
     private final WorldLoader _world;
     private final InputStream _stream;
-    private HashMap<String, A_ComponentAirport<?>> _airportComponents;
+    private HashMap<String, A_ComponentAirport<?>> _airportComponents; // DOES NOT TAKE A_ -- only component seperate taxiway
     private HashMap<String, GeometryPolyline> _polylines;
     private HashMap<String, A_ComponentNavaid<?>> _navaidComponents;
     private ArrayList<ComponentAirport> _airports;
@@ -34,17 +34,22 @@ public class WorldLoaderParser {
         try {
             String data = streamToString();
             Scanner scan = new Scanner(data);
+
+            System.out.println("data: " + data);
+
             while(scan.hasNextLine()){
                 String lines = scan.nextLine();
                 if(lines.contains("/")){ lines = lines.substring(0, lines.indexOf('/'));    }
-                String[] temp = lines.split("[ ><,:#\'\"\\}\\{\\)\\(]+");
+                String[] temp = lines.split("[ ><,:#\'\"\\)\\(]+");
+
+
 
                 switch(temp[0].toUpperCase()){
-                    case "CREATE": create(temp);
+                    case "CREATE": //create(temp);
                         break;
                     case "DEFINE": define(temp);
                         break;
-                    case "ADD": add(temp);
+                    case "ADD": //add(temp);
                         break;
                     default: // do nothing .. bad input
                 }
@@ -90,7 +95,7 @@ public class WorldLoaderParser {
 
 
     }
-//    CREATE AIRPORT myairport2 AT 47#41'5":117#1'2":800 WITH BUILDINGS mybuilding1 GATES mygate1 TOWERS mytower1 SIGNS mysign1 RAMPS myramp1 TAXIWAYS mytaxiway1 RUNWAYS myrunway2
+
     private void createAirport(final String[] line) throws Exception {
         ComponentAirport airport = new ComponentAirport(line[3], new CoordinatesWorld3D_ATC(
                 new Latitude_ATC(Integer.parseInt(line[4]), Integer.parseInt(line[5]), Double.parseDouble(line[6])),
@@ -104,17 +109,21 @@ public class WorldLoaderParser {
 
     }
 
-    private int addComponents(final ComponentAirport airport, final int count, final String[] lines, final String... delimiters) throws Exception {
+    private int addComponents(final ComponentAirport airport, final int count, final String[] line, final String... delimiters) throws Exception {
         boolean delim = false;
         int index = count;
         do{
             for(int x = 0; x < delimiters.length; x++) {
-                if(!(lines[index].compareToIgnoreCase(delimiters[x]) == 0)){
+                if(!(line[index].compareToIgnoreCase(delimiters[x]) == 0)){
                     delim = true;
                 }
             }
             if(!delim){
-                airport.addComponent(_airportComponents.get(lines[index + 1])); // fix so adds all of same type..
+                if(line[1].compareToIgnoreCase("TAXIWAY") == 0 || line[1].compareToIgnoreCase("RUNWAY") == 0 || line[1].compareToIgnoreCase("RAMP") == 0){
+                    airport.addComponent((A_ComponentAirportTaxiable<?>)_airportComponents.get(line[index + 1])); // assure that taxiway goes to correct method
+                }else {
+                    airport.addComponent(_airportComponents.get(line[index + 1])); // fix so adds all of same type..
+                }
                 index += 2;
             }
         }while(!delim);
