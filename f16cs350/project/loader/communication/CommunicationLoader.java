@@ -1,9 +1,6 @@
 package f16cs350.project.loader.communication;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  *  CSCD:350 -- PROJECT Pt. 1B -- TEAM 5
@@ -69,15 +66,22 @@ public class CommunicationLoader {
    }
 
    public String decodeLog(String log){
-        //split by new line
-        //first line is checksum
-        //compare checksum to actual checksum
-        //each line after is statement
-        //split time and statement
-        //decodeTime();
-        //decodeStatement();
-        //rebuild decoded log and return
-      return null;
+        String ret = "";
+       try {
+           Scanner s = new Scanner(log);
+          int check = Integer.parseInt(s.nextLine());
+          System.out.println("check " + check + "    - " + checksum);
+           if (s.hasNextLine() && check == this.checksum ) {
+                while(s.hasNextLine()){
+                    ret += decodeStatement(s.nextLine());
+                   System.out.println("RET + " + ret);
+                }
+           }
+       }catch(Exception e){
+           throw new RuntimeException("Decode log FAILED. " +e.getMessage());
+       }
+
+      return ret;
    }
 
    public double decodeTime(String time){
