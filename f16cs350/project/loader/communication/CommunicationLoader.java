@@ -70,11 +70,9 @@ public class CommunicationLoader {
        try {
            Scanner s = new Scanner(log);
           int check = Integer.parseInt(s.nextLine());
-          System.out.println("check " + check + "    - " + checksum);
            if (s.hasNextLine() && check == this.checksum ) {
                 while(s.hasNextLine()){
                     ret += decodeStatement(s.nextLine());
-                   System.out.println("RET + " + ret);
                 }
            }
        }catch(Exception e){
