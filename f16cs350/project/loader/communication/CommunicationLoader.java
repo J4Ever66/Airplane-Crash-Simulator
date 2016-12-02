@@ -20,7 +20,7 @@ public class CommunicationLoader {
             "tower", "traffic", "turn", "two", "um", "unable", "uniform", "united", "until", "vector", "vfr", "via", "victor", "vor", "west", "what", "when", "where", "whether", "whiskey", "who", "why",
             "wilco", "will", "with", "x-ray", "yankee", "you", "zero", "zulu"};
 
-   private HashMap<String, String> dictionary;
+   private HashMap<String, String> dictionary, opposite;
    private HashSet<String> customWords;
    private String[] key = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E",
     "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
@@ -31,7 +31,9 @@ public class CommunicationLoader {
       this.encodeSize = encodingSize;
       this.customWords = new HashSet<>();
       this.dictionary = new HashMap<>();
+      this.opposite = new HashMap<>();
       fillDictionary();
+
    
       this.checksum = dictionary.hashCode();
    }
@@ -60,7 +62,7 @@ public class CommunicationLoader {
       
       int l,r;
       for(l=0,r=inc;r<statement.length()+1;l += inc, r += inc)
-         retWords += " " + dictionary.get(statement.substring(l,r));
+         retWords += " " + dictionaryString[Integer.parseInt(statement.substring(l,r),getBase())];
       
       return time + retWords;
    }
@@ -72,7 +74,9 @@ public class CommunicationLoader {
           int check = Integer.parseInt(s.nextLine());
            if (s.hasNextLine() && check == this.checksum ) {
                 while(s.hasNextLine()){
-                    ret += decodeStatement(s.nextLine());
+                   String temp= s.nextLine();
+                   System.out.println(temp);
+                    ret += decodeStatement(temp);
                 }
            }
        }catch(Exception e){
@@ -198,7 +202,9 @@ public class CommunicationLoader {
 
    private void fillDictionary(){  // populate the dictionary at startup with hard coded words ( does not save custom words )
       for(int x = 0; x < dictionaryString.length; x++){
-         dictionary.put(getNextFreeIndex(), dictionaryString[x]);
+         String index = getNextFreeIndex();
+         dictionary.put(index, dictionaryString[x]);
+         opposite.put(dictionaryString[x], index);
          wordCount++;
       }
    }
