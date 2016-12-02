@@ -146,6 +146,7 @@ public class CommunicationLoader {
    public String registerCustomWord(String index, String word){
       if(!dictionary.containsKey(index)) {
          this.dictionary.put(index, word);
+         this.opposite.put(word, index);
          this.checksum = dictionary.hashCode();
          wordCount++;
       }
