@@ -19,9 +19,7 @@ public class CommunicationLoader {
             "six", "south", "southeast", "southwest", "speed", "squawk", "standby", "takeoff", "tango", "taxi", "taxiway", "terminal", "terminated", "terrain", "the", "then", "thousand", "three", "to",
             "tower", "traffic", "turn", "two", "um", "unable", "uniform", "united", "until", "vector", "vfr", "via", "victor", "vor", "west", "what", "when", "where", "whether", "whiskey", "who", "why",
             "wilco", "will", "with", "x-ray", "yankee", "you", "zero", "zulu"};
-
    private HashMap<String, String> dictionary, opposite;
-   private HashSet<String> customWords;
    private String[] key = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E",
     "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
 
@@ -29,12 +27,9 @@ public class CommunicationLoader {
       this.wordCount = 0;
       this.base = base;
       this.encodeSize = encodingSize;
-      this.customWords = new HashSet<>();
       this.dictionary = new HashMap<>();
       this.opposite = new HashMap<>();
       fillDictionary();
-
-   
       this.checksum = dictionary.hashCode();
    }
 
@@ -49,38 +44,39 @@ public class CommunicationLoader {
 
    public String decodeStatement(String statement)
    {
-      int timeLength = (int)Math.round(Math.ceil(Math.log(9999999) / Math.log(getBase())));
-      
-      int inc = getEncodingSize();
 
-      String time = "" + decodeTime(statement.substring(0,(timeLength)));
+         int timeLength = (int) Math.round(Math.ceil(Math.log(9999999) / Math.log(getBase()))),
+                 inc = getEncodingSize();
+         String retWords = "",
+                 time = "" + decodeTime(statement.substring(0, (timeLength)));
+         try {
+         statement = statement.substring(timeLength);
 
-      String temp,retWords = "";
-      int tempIndex;
+         int l, r;
+         String key;
+         for (l = 0, r = inc; r < statement.length() + 1; l += inc, r += inc)
+            retWords += " " + dictionary.get(statement.substring(l, r));
+      	}catch(Exception e){
+        	    throw new RuntimeException("Decode statement FAILED. " +e.getMessage());
+      	}
       
-      statement = statement.substring(timeLength);
-      
-      int l,r;
-      for(l=0,r=inc;r<statement.length()+1;l += inc, r += inc)
-         retWords += " " + dictionaryString[Integer.parseInt(statement.substring(l,r),getBase())];
-      
-      return time + retWords;
+      return time + retWords.toUpperCase();
    }
-
+ 
    public String decodeLog(String log){
-        String ret = "";
-       try {
-           Scanner s = new Scanner(log);
-          int check = Integer.parseInt(s.nextLine());
-           if (s.hasNextLine() && check == this.checksum ) {
-                while(s.hasNextLine()){
-                    ret += decodeStatement(s.nextLine());
-                }
-           }
-       }catch(Exception e){
-           throw new RuntimeException("Decode log FAILED. " +e.getMessage());
-       }
-
+      String ret = "";
+      try {
+         Scanner s = new Scanner(log);
+         int check = Integer.parseInt(s.nextLine());
+         if (s.hasNextLine() && check == this.checksum ) {
+            while(s.hasNextLine()){
+               ret += decodeStatement(s.nextLine());
+            }
+         }
+      }catch(Exception e){
+         throw new RuntimeException("Decode log FAILED. " +e.getMessage());
+      }
+   
       return ret;
    }
 
@@ -94,23 +90,25 @@ public class CommunicationLoader {
       String temp,phraseString = "",timeString = encodeTime(time);
    
       ArrayList<String> wordList = new ArrayList<String>();
-      
+      try {
       for (String retval: words.split(" ")) 
-         wordList.add(retval.toUpperCase());
-   
+         wordList.add(retval);
+            
       while(!wordList.isEmpty())
       {
-         temp = Integer.toString(turnIntoNumber(wordList.remove(0)),base).toUpperCase();
+         temp = opposite.get(wordList.remove(0));
          int g=(len-temp.length());
          String zeros="";
          for(i=0;i<g;i++){
             zeros += "0";}
          phraseString += (zeros+temp);
       }
-      
+      }catch(Exception e){
+         throw new RuntimeException("Encode statement FAILED. " +e.getMessage());
+      }
       return timeString + phraseString;
-   }
-
+   }//////////////////////
+   
    public String encodeTime(double time)//base 10
    {
       long len = Math.round(Math.ceil(Math.log(9999999) / Math.log(getBase())));
@@ -119,8 +117,7 @@ public class CommunicationLoader {
       //           ^convert long to int    ^convert double to long
    
       String ret = Integer.toString(newNum,getBase()).toUpperCase();
-      //           ^convert to target base  
-   
+      //           ^convert to target base
       int i;
       long g=(len-ret.length());
       String zeros="";
@@ -130,21 +127,10 @@ public class CommunicationLoader {
       return zeros + ret;
    }//return at target base
     
-   private  int turnIntoNumber(String search)
-   {  
-      
-      int i;
-      for(i=0;i<dictionaryString.length;i++)
-         if((dictionaryString[i].toUpperCase()).compareTo(search) == 0)
-            return i;
-   
-      throw new RuntimeException("Word not found");
-   }
-
    public String registerCustomWord(String index, String word){
       if(!dictionary.containsKey(index)) {
-         this.dictionary.put(index, word);
-         this.opposite.put(word, index);
+         this.dictionary.put(index, word.toUpperCase());
+         this.opposite.put(word.toUpperCase(), index);
          this.checksum = dictionary.hashCode();
          wordCount++;
       }
@@ -205,8 +191,8 @@ public class CommunicationLoader {
    private void fillDictionary(){  // populate the dictionary at startup with hard coded words ( does not save custom words )
       for(int x = 0; x < dictionaryString.length; x++){
          String index = getNextFreeIndex();
-         dictionary.put(index, dictionaryString[x]);
-         opposite.put(dictionaryString[x], index);
+         dictionary.put(index, dictionaryString[x].toUpperCase());
+         opposite.put(dictionaryString[x].toUpperCase(), index);
          wordCount++;
       }
    }
@@ -226,5 +212,4 @@ public class CommunicationLoader {
    public int getEncodingSize(){
       return this.encodeSize;
    }
-
 }
