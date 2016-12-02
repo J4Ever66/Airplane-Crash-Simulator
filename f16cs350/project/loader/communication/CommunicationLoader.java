@@ -4,7 +4,7 @@ import java.util.*;
 
 /**
  *  CSCD:350 -- PROJECT Pt. 1B -- TEAM 5
- *  Aaron Griffis - Grant Edwards - Jordan Everard
+ *  Aaron Griffis(mia) - Grant Edwards - Jordan Everard
  **/
 public class CommunicationLoader {
    private int base, encodeSize, checksum, wordCount;
@@ -74,9 +74,7 @@ public class CommunicationLoader {
           int check = Integer.parseInt(s.nextLine());
            if (s.hasNextLine() && check == this.checksum ) {
                 while(s.hasNextLine()){
-                   String temp= s.nextLine();
-                   System.out.println(temp);
-                    ret += decodeStatement(temp);
+                    ret += decodeStatement(s.nextLine());
                 }
            }
        }catch(Exception e){
@@ -196,6 +194,9 @@ public class CommunicationLoader {
       while(curIndex > 0){
          res = key[ curIndex % base  ] + res;
          curIndex /= base;
+      }
+      while(res.length() < encodeSize){
+         res = "0" + res; // add on 0 until matches encodeSize
       }
       return res;
    }
