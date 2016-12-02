@@ -60,7 +60,7 @@ public class CommunicationLoader {
       
       int l,r;
       for(l=0,r=inc;r<statement.length()+1;l += inc, r += inc)
-         retWords += " " + dictionaryString[Integer.parseInt(statement.substring(l,r),getBase())];
+         retWords += " " + dictionary.get(statement.substring(l,r));
       
       return time + retWords;
    }
