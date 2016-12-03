@@ -4,17 +4,18 @@ import f16cs350.atc.datatype.*;
 import f16cs350.atc.graphics.geometry.GeometryPolyline;
 import f16cs350.atc.world.airport.*;
 import f16cs350.atc.world.navigation.A_ComponentNavaid;
+import f16cs350.atc.world.navigation.ComponentNavaidFix;
 
 import java.io.InputStream;
 import java.util.*;
 
-/**     ###     WorldLoader     ###
+/**     ###     WorldLoader - INCOMPLETE!    ###
  *      Aaron Griffis - Grant Edwards - Jordan Everard
  **/
 public class WorldLoaderParser {
     private final WorldLoader _world;
     private final InputStream _stream;
-    private HashMap<String, A_ComponentAirport<?>> _airportComponents; // DOES NOT TAKE A_ -- only component seperate taxiway
+    private HashMap<String, A_ComponentAirport<?>> _airportComponents;
     private HashMap<String, GeometryPolyline> _polylines;
     private HashMap<String, A_ComponentNavaid<?>> _navaidComponents;
     private ArrayList<ComponentAirport> _airports;
@@ -35,19 +36,17 @@ public class WorldLoaderParser {
             String data = streamToString();
             Scanner scan = new Scanner(data);
 
-            System.out.println("data: " + data);
+            //System.out.println("data: " + data);
 
             while(scan.hasNextLine()){
                 String lines = scan.nextLine();
                 if(lines.contains("/")){ lines = lines.substring(0, lines.indexOf('/'));    }
                 String[] temp = lines.split("[ ><,:#\'\"\\)\\(]+");
 
-
-
                 switch(temp[0].toUpperCase()){
-                    case "CREATE": //create(temp);
+                    case "CREATE": create(temp);
                         break;
-                    case "DEFINE": define(temp);
+                    case "DEFINE": //define(temp);
                         break;
                     case "ADD": //add(temp);
                         break;
@@ -67,10 +66,12 @@ public class WorldLoaderParser {
     }
 
     private void create(final String[] line) throws Exception { // create
+        /*
         System.out.println("CREATE:\n");
         for(int x = 0; x < line.length; x++){
             System.out.println("[" + x + "]" + " - " + line[x]);
         }
+        */
 
         switch(line[1].toUpperCase()){
             case "AIRPORT": createAirport(line);
@@ -184,20 +185,33 @@ public class WorldLoaderParser {
         _airportComponents.put(line[2], new ComponentAirportSign(line[2], new CoordinatesCartesianAbsolute_ATC(Double.parseDouble(line[x + 1]), Double.parseDouble(line[x + 2])), signAlias));
     }
 
-    //=======================================================================================================================================================================================
+    //=================================================================================
+
     private void createNavaid(final String[] line) throws Exception {
-        //create VOR, NDB, ILS, AIRWAY, FIX
-        // add components to the _navaid <id, object>
-        // if uses other components, find the component in the _navaidComponents ( very similar to airport )
+
+        if(line[2].equals("FIX"))
+        {
+
+            ComponentNavaidFix navaidFix = new ComponentNavaidFix(line[3],new CoordinatesWorld3D_ATC(
+                    new Latitude_ATC (Integer.parseInt(line[5]),Integer.parseInt(line[6]),Double.parseDouble(line[7])),
+                    new Longitude_ATC(Integer.parseInt(line[8]), Integer.parseInt(line[9]),Double.parseDouble(line[10])),
+                    new Altitude_ATC(Double.parseDouble(line[11]))));
+            //create VOR, NDB, ILS, AIRWAY, FIX
+            // add components to the _navaid <id, object>
+            // if uses other components, find the component in the _navaidComponents ( very similar to airport )
+        }
     }
 
 
-    //=======================================================================================================================================================================================
+
+    //=================================================================================
     private void define(final String[] line){
+        /*
         System.out.println("DEFINE:\n");
         for(int x = 0; x < line.length; x++){
             System.out.println("[" + x + "]" + " - " + line[x]);    //  { <COORDINATE> <COORDINATE> }
         }
+        */
         if(line[1].compareToIgnoreCase("POLYLINE") == 0) {  // DEFINE POLYLINE mypoly3 AS {<-10,-20> <-30,0>} {<15,-25> <-35,-20>} <50,60>
 
 
